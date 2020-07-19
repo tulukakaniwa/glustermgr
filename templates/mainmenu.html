@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gluster Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}"/>
+</head>
+<body>
+<h1>Main Menu</h1>
+{% if exceptionmsg is none %}
+    <h2>Peer info</h2>
+    <a class="button" href="{{ url_for("showpage_probe_peer") }}">Probe peer</a>
+    {% if peers|length < 1 %}
+        <p>No peers available.</p>
+    {% else %}
+        <table>
+            <tr class="title-line">
+                <td>Host</td>
+                <td>Status</td>
+                <td>UUID</td>
+                <td>Operation</td>
+            </tr>
+            {% for peer in peers %}
+                <tr>
+                    <td>{{ peer["hostname"] }}</td>
+                    <td>{{ peer["connected"] }}</td>
+                    <td>{{ peer["uuid"] }}</td>
+                    <td>
+                        <a class="button" href="{{ url_for("peer_details", peername=peer["hostname"]) }}">Manage</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+    <h2>Volume info</h2>
+    <a class="button" href="{{ url_for("showpage_create_volume") }}">Create volume</a>
+    {% if volumes|length < 1 %}
+        <p>No volumes available.</p>
+    {% else %}
+        <table>
+            <tr class="title-line">
+                <td>Name</td>
+                <td>Status</td>
+                <td>Type</td>
+                <td>Bricks</td>
+                <td>UUID</td>
+                <td>Operation</td>
+            </tr>
+            {% for volume in volumes %}
+                <tr>
+                    <td>{{ volume["name"] }}</td>
+                    <td>{{ volume["status"] }}</td>
+                    <td>{{ volume["type"] }}</td>
+                    <td>{{ volume["num_bricks"] }}</td>
+                    <td>{{ volume["uuid"] }}</td>
+                    <td>
+                        <a class="button" href="{{ url_for("volume_details", volname=volume["name"]) }}">Manage</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% else %}
+    <h2 class="error">Error occurred when handling request</h2>
+    <p class="mono">{{ exceptionmsg }}</p>
+{% endif %}
+<div class="page-bottom"></div>
+<footer>
+    <p>GlusterMgr on <span class="mono">{{ myhostname }} ({{ myaddress }})</span></p>
+</footer>
+</body>
+</html>

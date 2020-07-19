@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add brick</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}"/>
+    <script src="{{ url_for('static', filename='manage_volume_add_brick.js') }}"></script>
+    <script src="{{ url_for('static', filename='tools.js') }}"></script>
+</head>
+<body>
+<h1>Add brick</h1>
+<a class="button" href="{{ url_for("main_menu") }}">Main Menu</a>
+<a class="button" href="{{ url_for("volume_details", volname=volname) }}">Volume: {{ volname }}</a>
+<form action="{{ url_for("do_add_brick", volname=volname) }}" method="post" id="create_brick_form">
+    <h2>Volume information</h2>
+    <table class="no-table-border all-left-align">
+        <tr>
+            <td><strong>Volume name: </strong></td>
+            <td><span class="mono">{{ volumeinfo['name'] }}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Volume type: </strong></td>
+            <td><span class="mono">{{ volumeinfo['type'] }}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Status: </strong></td>
+            <td><span class="mono">{{ volumeinfo['status'] }}</span></td>
+        </tr>
+
+    </table>
+    <h2>Configured bricks</h2>
+    <p><strong>Total bricks: </strong>{{ volumeinfo["num_bricks"] }}</p>
+    <table class="all-left-align no-table-border mono">
+        <tr>
+            <td><strong>Distribute:</strong></td>
+            <td>{{ volumeinfo["distribute"]|default(0) }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Replica:</strong></td>
+            <td>{{ volumeinfo["replica"]|default(0) }}</td>
+            <ul>
+                <td>
+                    <strong>Arbiter:</strong>
+                </td>
+                <td>{{ volumeinfo["arbiter"]|default(0) }}</td>
+            </ul>
+        </tr>
+        <tr>
+            <td><strong>Disperse:</strong></td>
+            <td>{{ volumeinfo["disperse"]|default(0) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Redundancy:</strong></td>
+            <td>{{ volumeinfo["redundancy"]|default(0) }}</td>
+        </tr>
+
+    </table>
+    <h2>Add Bricks</h2>
+    <div id="brick_view">
+        <div id="brick_ops">
+            {#            <h3>Add brick</h3>#}
+            <p class="mono">Add brick:
+                <select id="brick_s_peer">
+                    {% for peer in peerlist %}
+                        <option value="{{ peer }}">{{ peer }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" id="brick_s_fspath">
+                <input type="button" onclick="add_element()" value="+" alt="Add brick">
+            </p>
+        </div>
+
+        <div id="brick_list">
+            <table class="all-left-align">
+                <p>(No bricks were added)</p>
+            </table>
+        </div>
+
+
+    </div>
+    <h2>New Bricks options</h2>
+    <table class="all-left-align no-table-border mono">
+
+        <tr>
+            <td>Add Replica:</td>
+            <td><input type="number" min="0" name="replica" value="0"></td>
+            <td>
+                <input type="checkbox" onchange="replica_change_val()" name="arbiter_enable"> Add Arbiter:
+            </td>
+            <td><input disabled type="number" min="0" name="arbiter" value="0"></td>
+        </tr>
+
+    </table>
+    <h2>Volume options</h2>
+
+    <p class="mono"><input type="checkbox" name="force">Force add brick (not recommended)</p>
+    <input class="mono" type="submit" value="Add brick">
+
+</form>
+<div class="page-bottom"></div>
+<footer>
+    <p>GlusterMgr on <span class="mono">{{ myhostname }} ({{ myaddress }})</span></p>
+</footer>
+</body>
+</html>

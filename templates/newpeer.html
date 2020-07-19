@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Peer probe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}"/>
+</head>
+<body>
+<h1>Probe peer</h1>
+<a class="button" href="{{ url_for("main_menu") }}">Main Menu</a>
+<form action="{{ url_for("do_probe_peer") }}" method="post">
+    <p class="mono">Enter peer hostname: <input type="text" name="peer_address"></p>
+    <input class="mono" type="submit" value="Probe">
+</form>
+<div class="page-bottom"></div>
+<footer>
+    <p>GlusterMgr on <span class="mono">{{ myhostname }} ({{ myaddress }})</span></p>
+</footer>
+</body>
+</html>

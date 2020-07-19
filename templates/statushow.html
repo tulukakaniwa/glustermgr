@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ status }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}"/>
+</head>
+<body>
+<h1>{{ operation }}</h1>
+<h2 style="color: {{ result_txt_color }}">{{ result }}</h2>
+<pre class="mono">{{ message }}</pre>
+{% if return_url is not none %}
+    <a href="{{ return_url }}" class="button">{{ return_btn_text }}</a>
+{% endif %}
+<footer>
+    <p>GlusterMgr on <span class="mono">{{ myhostname }} ({{ myaddress }})</span></p>
+</footer>
+</body>
+</html>

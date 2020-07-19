@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage volume: {{ volumeinfo['name'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}"/>
+    <script src="{{ url_for('static', filename='tools.js') }}"></script>
+</head>
+<body>
+<h1>Manage Volume: {{ volumeinfo['name'] }}</h1>
+<a class="button" href="{{ url_for("main_menu") }}">Main Menu</a>
+<h2>Volume info</h2>
+<div>
+    <table class="no-table-border all-left-align">
+        <tr>
+            <td><strong>Volume name: </strong></td>
+            <td><span class="mono">{{ volumeinfo['name'] }}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Volume type: </strong></td>
+            <td><span class="mono">{{ volumeinfo['type'] }}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Status: </strong></td>
+            <td><span class="mono">{{ volumeinfo['status'] }}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Transport protocol: </strong></td>
+            <td><span class="mono">{{ volumeinfo['transport'] }}</span></td>
+        </tr>
+        <tr>
+            <td><strong>Volume UUID: </strong></td>
+            <td><span class="mono">{{ volumeinfo['uuid'] }}</span></td>
+        </tr>
+    </table>
+</div>
+<h2>Brick info</h2>
+<p><strong>Total bricks: </strong>{{ volumeinfo["num_bricks"] }}</p>
+<table class="all-left-align no-table-border mono">
+    <tr>
+        <td><strong>Distribute:</strong></td>
+        <td>{{ volumeinfo["distribute"]|default(0) }}</td>
+    </tr>
+
+    <tr>
+        <td><strong>Replica:</strong></td>
+        <td>{{ volumeinfo["replica"]|default(0) }}</td>
+        <ul>
+            <td>
+                <strong>Arbiter:</strong>
+            </td>
+            <td>{{ volumeinfo["arbiter"]|default(0) }}</td>
+        </ul>
+    </tr>
+    <tr>
+        <td><strong>Disperse:</strong></td>
+        <td>{{ volumeinfo["disperse"]|default(0) }}</td>
+    </tr>
+    <tr>
+        <td><strong>Redundancy:</strong></td>
+        <td>{{ volumeinfo["redundancy"]|default(0) }}</td>
+    </tr>
+</table>
+
+<table>
+    <tr class="title-line">
+        <td>Peer</td>
+        <td>Path</td>
+        <td>Status</td>
+        {% if volumeinfo["transport"] == "TCP" or volumeinfo["transport"] == "TCP,RDMA" %}
+            <td>TCP Port</td>
+        {% endif %}
+        {% if volumeinfo["transport"] == "RDMA" or volumeinfo["transport"] == "TCP,RDMA" %}
+            <td>RDMA Port</td>
+        {% endif %}
+        <td>PID</td>
+        <td>Total space</td>
+        <td>Free space</td>
+        <td>Device</td>
+        <td>FS Type</td>
+        <td>Block size</td>
+        <td>Mount Opts.</td>
+        <td>UUID</td>
+    </tr>
+    {% for brick in volumeinfo["bricks"] %}
+        <tr>
+            <td class="no-wrap">{{ brick["name"].split(":",1)[0] }}</td>
+            <td class="no-wrap">{{ brick["name"].split(":",1)[1] }}</td>
+            <td>
+                {% if brick["online"] %}
+                    <span style="color: green;">Online</span>
+                {% else %}
+                    <span style="color: red;">Offline</span>
+                {% endif %}
+            </td>
+            {% if volumeinfo["transport"] == "TCP" or volumeinfo["transport"] == "TCP,RDMA" %}
+                <td>{{ brick["ports"]["tcp"] }}</td>
+            {% endif %}
+            {% if volumeinfo["transport"] == "RDMA" or volumeinfo["transport"] == "TCP,RDMA" %}
+                <td>{{ brick["ports"]["rdma"] }}</td>
+            {% endif %}
+            <td>{{ brick["pid"] }}</td>
+            <td>
+                {% if brick["size_total"].isdigit() %}
+                    {{ brick["size_total"]|filesizeformat(True) }}
+                {% else %}
+                    {{ brick["size_total"] }}
+                {% endif %}
+            </td>
+            <td>
+                {% if brick["size_free"].isdigit() %}
+                    {{ brick["size_free"]|filesizeformat(True) }}
+                {% else %}
+                    {{ brick["size_free"] }}
+                {% endif %}
+            </td>
+            <td>{{ brick["device"] }}</td>
+            <td>{{ brick["fs_name"] }}</td>
+            <td>
+                {% if brick["block_size"].isdigit() %}
+                    {{ brick["block_size"]|filesizeformat(True) }}
+                {% else %}
+                    {{ brick["block_size"] }}
+                {% endif %}
+            </td>
+            <td>{{ brick["mnt_options"] }}</td>
+            <td>{{ brick["uuid"] }}</td>
+        </tr>
+    {% endfor %}
+</table>
+<h2>Volume options</h2>
+{% if volumeinfo["options"]|length == 0 %}
+    <p>No option were configured for this volume.</p>
+{% else %}
+    <table class="all-left-align">
+        <tr class="title-line">
+            <td>
+                Option
+            </td>
+            <td>
+                Value
+            </td>
+        </tr>
+        {% for option in volumeinfo["options"] %}
+            <tr>
+                <td>
+                    {{ option["name"] }}
+                </td>
+                <td>
+                    {{ option["value"] }}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+<h2>Operations </h2>
+<button class="inline" {% if not (volumeinfo["status"] == "Created" or volumeinfo["status"] == "Stopped") %}
+        disabled {% endif %}
+        onclick="ask_and_jump('Are you sure to delete volume {{ volumeinfo["name"] }} ?', '{{ url_for("do_delete_volume", volname=volumeinfo["name"]) }}')">
+    Delete Volume
+</button>
+
+
+<button class="inline" {% if (volumeinfo["status"] == "Created" or volumeinfo["status"] == "Stopped") %}
+        disabled {% endif %}
+        onclick="ask_and_jump('Are you sure to stop volume {{ volumeinfo["name"] }} ?', '{{ url_for("do_stop_volume", volname=volumeinfo["name"]) }}')">
+    Stop Volume
+</button>
+
+<button class="inline" {% if not (volumeinfo["status"] == "Created" or volumeinfo["status"] == "Stopped") %}
+        disabled {% endif %}
+        onclick="jump('{{ url_for("do_start_volume", volname=volumeinfo["name"]) }}')">Start Volume
+</button>
+
+<button class="inline"
+        onclick="jump('{{ url_for("showpage_volume_add_brick", volname=volumeinfo["name"]) }}')">Add brick to volume
+</button>
+<div class="page-bottom"></div>
+<footer>
+    <p>GlusterMgr on <span class="mono">{{ myhostname }} ({{ myaddress }})</span></p>
+</footer>
+</body>
+</html>
